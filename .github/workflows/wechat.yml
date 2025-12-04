@@ -2,9 +2,6 @@ name: Build and Push Wechat Docker Images
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'  # 当推送任意 tag 时触发
 
 jobs:
   build:
@@ -12,14 +9,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 确保能获取到所有 tags
-
-      - name: Get latest Git tag
-        id: git_tag
-        run: |
-          TAG=$(git describe --tags --abbrev=0)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -47,5 +36,5 @@ jobs:
             linux/s390x
           push: true
           tags: |
-            weiensong/wechat:${{ steps.git_tag.outputs.tag }}
+            weiensong/wechat:0.0.1
             weiensong/wechat:latest
