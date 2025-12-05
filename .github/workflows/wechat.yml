@@ -36,6 +36,5 @@ jobs:
           push: true
 
           tags: |
-            weiensong/wechat:${{ github.sha }}
-            weiensong/wechat:${{ github.sha::7 }}
+            weiensong/wechat:${GITHUB_SHA::7}
             weiensong/wechat:latest
