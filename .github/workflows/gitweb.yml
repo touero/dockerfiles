@@ -38,9 +38,8 @@ jobs:
 
     - name: Build and Push
       uses: docker/build-push-action@v6
-      working-directory: ./gitweb
       with:
-        context: .
+        context: ./gitweb
         platforms: |
           linux/386
           linux/amd64
