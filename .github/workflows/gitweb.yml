@@ -17,7 +17,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: rockstorm/gitweb
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/gitweb
         tags: |
           # production (i.e. 2.36+b1)
           type=ref,event=tag,priority=600
