@@ -4,7 +4,7 @@ import socketserver
 import os
 from html import escape
 
-os.chdir("/web_dir")
+os.chdir("./")
 PORT = 80
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
@@ -55,7 +55,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
         self.wfile.write(b"</ul><hr>")
 
-        self.wfile.write(b'<p>These executables are provided by <a href="https://www.bib.uni-mannheim.de/" style="color:#83a598;">Mannheim University Library</a>.</p>')
+        self.wfile.write(b'<p>These executables are provided by <a href="https://github.com/touero" style="color:#83a598;">touero</a>.</p>')
         self.wfile.write(
             b"""<p>Licensed under the Apache License, Version 2.0 (the "License");
                 you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 limitations under the License.</p>"""
         )
         self.wfile.write(
-            b"""<p>See <a href="https://github.com/UB-Mannheim/tesseract">https://github.com/UB-Mannheim/tesseract</a>
+            b"""<p>See <a href="https://github.com/touero/dockerfiles">https://github.com/touero/dockerfiles</a>
                 for more information and our source code.</p>"""
         )
 
