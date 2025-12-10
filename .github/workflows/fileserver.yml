@@ -3,7 +3,7 @@ name: Build and Push FileServer Docker Images
 on:
   push:
     tags:
-      - '**'
+      - 'fileserver-*'
 
 jobs:
   build-image:
@@ -17,12 +17,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: weiensong/fileserver
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/gitweb
         tags: |
-          # production (i.e. 2.36+b1)
-          type=ref,event=tag,priority=600
-          # stable (i.e. 2.36)
-          type=match,pattern=[^\+]+,priority=500
+          type=match,pattern=^fileserver-(.*)$,group=1
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -38,10 +35,10 @@ jobs:
 
     - name: Build and Push
       uses: docker/build-push-action@v6
-      working-directory: ./fileserver
       with:
-        context: .
+        context: ./fileserver
         platforms: |
+          linux/386
           linux/amd64
           linux/arm/v6
           linux/arm/v7
