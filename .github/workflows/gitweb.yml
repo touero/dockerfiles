@@ -3,7 +3,7 @@ name: Build and Push Gitweb Docker Images
 on:
   push:
     tags:
-      - '**'
+      - 'gitweb-*'
 
 jobs:
   build-image:
@@ -19,10 +19,7 @@ jobs:
       with:
         images: ${{ secrets.DOCKERHUB_USERNAME }}/gitweb
         tags: |
-          # production (i.e. 2.36+b1)
-          type=ref,event=tag,priority=600
-          # stable (i.e. 2.36)
-          type=match,pattern=[^\+]+,priority=500
+          type=match,pattern=^gitweb-(.*)$,group=1
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
