@@ -17,7 +17,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/gitweb
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/fileserver
         tags: |
           type=match,pattern=^fileserver-(.*)$,group=1
 
