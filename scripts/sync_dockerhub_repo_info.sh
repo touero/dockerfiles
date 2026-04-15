@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME is required}"
+: "${DOCKERHUB_TOKEN:?DOCKERHUB_TOKEN is required}"
+
+CATEGORY="${CATEGORY:-}"
+REPOS=(fileserver gitweb wechat)
+
+jwt="$(curl -fsSL -X POST https://hub.docker.com/v2/users/login/ \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}" | jq -r '.token')"
+
+if [[ -z "${jwt}" || "${jwt}" == "null" ]]; then
+  echo "Failed to obtain Docker Hub JWT token." >&2
+  exit 1
+fi
+
+for repo in "${REPOS[@]}"; do
+  readme_path="${repo}/README.md"
+  if [[ ! -f "${readme_path}" ]]; then
+    echo "Missing ${readme_path}" >&2
+    exit 1
+  fi
+
+  raw_description="$(awk 'NF && $0 !~ /^#/ {print; exit}' "${readme_path}")"
+  description="$(RAW_DESCRIPTION="${raw_description}" python3 - <<'PY2'
+import os
+text = os.environ.get('RAW_DESCRIPTION', '')
+data = text.encode('utf-8')
+if len(data) <= 100:
+    print(text, end='')
+else:
+    data = data[:100]
+    while data:
+        try:
+            print(data.decode('utf-8'), end='')
+            break
+        except UnicodeDecodeError:
+            data = data[:-1]
+PY2
+)"
+  full_description="$(cat "${readme_path}")"
+
+  payload="$(jq -n \
+    --arg description "${description}" \
+    --arg full_description "${full_description}" \
+    --arg category "${CATEGORY}" \
+    'if $category == "" then
+      {description: $description, full_description: $full_description}
+     else
+      {description: $description, full_description: $full_description, category: $category}
+     end')"
+
+  http_code="$(curl -sS -o /tmp/dockerhub_response.json -w '%{http_code}' \
+    -X PATCH "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${repo}/" \
+    -H "Authorization: JWT ${jwt}" \
+    -H 'Content-Type: application/json' \
+    -d "${payload}")"
+
+  if [[ "${http_code}" -lt 200 || "${http_code}" -ge 300 ]]; then
+    echo "Failed to update ${repo}, HTTP ${http_code}" >&2
+    cat /tmp/dockerhub_response.json >&2
+    exit 1
+  fi
+
+  echo "Updated ${DOCKERHUB_USERNAME}/${repo}"
+done

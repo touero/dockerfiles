@@ -1,60 +1,26 @@
+name: Sync Docker Hub Repository Info
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: Optional Docker Hub category slug (applies to all repos)
+        required: false
+        type: string
+
+jobs:
+  sync-repo-info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Sync repository descriptions and overviews
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_JWT: ${{ steps.login.outputs.jwt }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           CATEGORY: ${{ github.event.inputs.category }}
-        run: |
-          set -euo pipefail
-
-          repos=(fileserver gitweb wechat)
-
-          for repo in "${repos[@]}"; do
-            readme_path="${repo}/README.md"
-            if [ ! -f "${readme_path}" ]; then
-              echo "Missing ${readme_path}" >&2
-              exit 1
-            fi
-
-            raw_description="$(awk 'NF && $0 !~ /^#/ {print; exit}' "${readme_path}")"
-            description="$(RAW_DESCRIPTION="${raw_description}" python3 - <<'PY2'
-import os
-text = os.environ.get('RAW_DESCRIPTION', '')
-data = text.encode('utf-8')
-if len(data) <= 100:
-    print(text, end='')
-else:
-    data = data[:100]
-    while data:
-        try:
-            print(data.decode('utf-8'), end='')
-            break
-        except UnicodeDecodeError:
-            data = data[:-1]
-PY2
-)"
-            full_description="$(cat "${readme_path}")"
-
-            payload="$(jq -n \
-              --arg description "${description}" \
-              --arg full_description "${full_description}" \
-              --arg category "${CATEGORY}" \
-              'if $category == "" then
-                {description: $description, full_description: $full_description}
-               else
-                {description: $description, full_description: $full_description, category: $category}
-               end')"
-
-            http_code="$(curl -sS -o /tmp/dockerhub_response.json -w '%{http_code}' \
-              -X PATCH "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${repo}/" \
-              -H "Authorization: JWT ${DOCKERHUB_JWT}" \
-              -H 'Content-Type: application/json' \
-              -d "${payload}")"
-
-            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
-              echo "Failed to update ${repo}, HTTP ${http_code}" >&2
-              cat /tmp/dockerhub_response.json >&2
-              exit 1
-            fi
-
-            echo "Updated ${DOCKERHUB_USERNAME}/${repo}"
-          done
+        run: ./scripts/sync_dockerhub_repo_info.sh
