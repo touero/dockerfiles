@@ -1,6 +1,6 @@
 # wechat
 
-A containerized WeChat desktop runtime environment adapted for Linux container workflows.
+A containerized WeChat desktop runtime environment adapted for Linux container workflows. Contains fcitx5 Chinese input method and novnc.
 
 ## Highlights
 
@@ -10,6 +10,18 @@ A containerized WeChat desktop runtime environment adapted for Linux container w
 
 ## Usage
 
+### deploy
+```bash
+docker run -d --name wechat -it weiensong/wechat:latest
+```
+
+### test
 ```bash
 docker run --rm -it weiensong/wechat:latest
+```
+
+
+### visit
+```
+http://127.0.0.1:6080/?autoconnect=1&password=secret&resize=scale&null
 ```
