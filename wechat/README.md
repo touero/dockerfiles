@@ -12,12 +12,12 @@ A containerized WeChat desktop runtime environment adapted for Linux container w
 
 ### deploy
 ```bash
-docker run -d --name wechat -it weiensong/wechat:latest
+docker run -d --name wechat --restart unless-stopped -p 6080:6080 weiensong/wechat:latest
 ```
 
 ### test
 ```bash
-docker run --rm -it weiensong/wechat:latest
+docker run --rm -p 6080:6080 -it weiensong/wechat:latest
 ```
 
 
