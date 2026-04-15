@@ -1,0 +1,26 @@
+name: Sync Docker Hub Repository Info
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: Optional Docker Hub category slug (applies to all repos)
+        required: false
+        type: string
+
+jobs:
+  sync-repo-info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Sync repository descriptions and overviews
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          CATEGORY: ${{ github.event.inputs.category }}
+        run: ./scripts/sync_dockerhub_repo_info.sh
