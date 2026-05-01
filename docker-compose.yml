@@ -1,0 +1,73 @@
+services:
+  fileserver-test:
+    build:
+      context: ./fileserver
+    image: local/fileserver:dev
+    command: ["python", "-m", "py_compile", "/server.py"]
+    restart: "no"
+
+  fileserver:
+    build:
+      context: ./fileserver
+    image: local/fileserver:dev
+    depends_on:
+      fileserver-test:
+        condition: service_completed_successfully
+    ports:
+      - "8000:80"
+    volumes:
+      - ./data/fileserver:/data
+    working_dir: /data
+
+  gitweb-test:
+    build:
+      context: ./gitweb
+    image: local/gitweb:dev
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        nginx -t
+        test -x /docker-entrypoint.d/50-start-fcgiwrap.sh
+        test -f /etc/gitweb.conf
+    restart: "no"
+
+  gitweb:
+    build:
+      context: ./gitweb
+    image: local/gitweb:dev
+    depends_on:
+      gitweb-test:
+        condition: service_completed_successfully
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data/gitweb:/srv/git:ro
+
+  wechat-test:
+    profiles: ["wechat"]
+    build:
+      context: ./wechat
+    image: local/wechat:dev
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        test -x /entrypoint.sh
+        bash -n /entrypoint.sh
+    restart: "no"
+
+  wechat:
+    profiles: ["wechat"]
+    build:
+      context: ./wechat
+    image: local/wechat:dev
+    depends_on:
+      wechat-test:
+        condition: service_completed_successfully
+    ports:
+      - "6080:6080"
+    environment:
+      - VNC_PASSWORD=secret
+      - DISPLAY_RESOLUTION=1280x960x24
+
