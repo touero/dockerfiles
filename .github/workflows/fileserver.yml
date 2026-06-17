@@ -8,6 +8,9 @@ on:
 jobs:
   build-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout Code
@@ -17,7 +20,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/fileserver
+        images: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/fileserver
+          ghcr.io/${{ github.repository_owner }}/fileserver
         tags: |
           type=match,pattern=^fileserver-(.*)$,group=1
 
@@ -32,6 +37,13 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Push
       uses: docker/build-push-action@v6
