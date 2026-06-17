@@ -24,10 +24,11 @@ jobs:
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/wechat
             ghcr.io/${{ github.repository_owner }}/wechat
+          flavor: |
+            latest=false
           tags: |
             type=match,pattern=^wechat-(.*)$,group=1
             type=sha,format=short
-            type=raw,value=latest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

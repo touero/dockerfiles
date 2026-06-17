@@ -23,6 +23,8 @@ jobs:
         images: |
           ${{ secrets.DOCKERHUB_USERNAME }}/fileserver
           ghcr.io/${{ github.repository_owner }}/fileserver
+        flavor: |
+          latest=false
         tags: |
           type=match,pattern=^fileserver-(.*)$,group=1
 
