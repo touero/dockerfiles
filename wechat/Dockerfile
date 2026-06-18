@@ -1,10 +1,19 @@
 FROM ubuntu:22.04
+
+ARG is_mirror=false
+
 ARG TARGETARCH=amd64
+
 ENV TARGETARCH=${TARGETARCH}
+
 ENV TZ=Asia/Shanghai
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN sed -i 's#http://.*ubuntu.com#http://mirrors.aliyun.com#g' /etc/apt/sources.list && apt update
+RUN if [ "$is_mirror" = "true" ]; then \
+        sed -i 's#http://.*ubuntu.com#http://mirrors.aliyun.com#g' /etc/apt/sources.list; \
+    fi && \
+    apt-get update
 
 RUN apt-get install -y \
         xvfb \
@@ -81,7 +90,8 @@ RUN echo "Downloading WeChat for ${TARGETARCH}..." && \
     else \
         wget https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb -O /tmp/wechat.deb ; \
     fi && \
-    dpkg -i /tmp/wechat.deb || true && apt-get install -f -y
+    dpkg -i /tmp/wechat.deb || true && apt-get install -f -y && \
+    rm -f /tmp/wechat.deb
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
