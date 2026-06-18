@@ -23,9 +23,8 @@ jobs:
         images: |
           ${{ secrets.DOCKERHUB_USERNAME }}/gitweb
           ghcr.io/${{ github.repository_owner }}/gitweb
-        flavor: |
-          latest=false
         tags: |
+          type=raw,value=latest
           type=match,pattern=^gitweb-(.*)$,group=1
 
     - name: Set up QEMU
