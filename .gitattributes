@@ -1,0 +1,3 @@
+scripts/** linguist-detectable=false
+fileserver/*.py linguist-detectable=false
+
