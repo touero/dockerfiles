@@ -1,0 +1,42 @@
+# --- OS junk ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# --- Editors / IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- Python (fileserver/server.py, scripts) ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# --- Go build artifacts (metrics/) ---
+# NOTE: metrics/data/ and docs/ are intentionally NOT ignored — the CSV and the
+# rendered SVG charts are committed by the metrics workflow every day.
+/metrics/collect
+/metrics/plot
+*.test
+*.prof
+coverage.out
+
+# --- Docker Compose bind-mount data (repo root only) ---
+/data/
+
+# --- Logs ---
+*.log
+
+# --- Local env / secrets ---
+.env
+.env.*
+!.env.example
